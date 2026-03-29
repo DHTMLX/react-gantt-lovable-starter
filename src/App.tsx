@@ -1,9 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Provider as ReduxProvider } from "react-redux";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DemoAuthProvider } from "@/features/auth/DemoAuthContext";
+import { DemoSignInModal } from "@/features/auth/DemoSignInModal";
+import { store } from "@/features/gantt/store";
+import Index from "./pages/Index";
 import { DemoSignInModal } from "@/features/auth/DemoSignInModal";
 import Index from "./pages/Index";
 import Projects from "./pages/Projects";

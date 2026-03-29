@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useDemoAuth } from "@/features/auth/DemoAuthContext";
 
 export interface Project {
   id: string;
@@ -9,18 +10,31 @@ export interface Project {
   completed_count: number;
 }
 
-async function fetchProjects(): Promise<Project[]> {
+async function fetchProjects(userId: string): Promise<Project[]> {
+  // Get project IDs the user is a member of
+  const { data: memberships, error: mErr } = await supabase
+    .from("project_members")
+    .select("project_id")
+    .eq("user_id", userId);
+
+  if (mErr) throw mErr;
+
+  const projectIds = (memberships ?? []).map((m) => m.project_id);
+  if (projectIds.length === 0) return [];
+
   const { data: projects, error: pErr } = await supabase
     .from("projects")
     .select("id, name, created_at")
+    .in("id", projectIds)
     .order("name");
 
   if (pErr) throw pErr;
 
-  // Fetch task counts per project in a single query
+  // Fetch task counts for these projects
   const { data: tasks, error: tErr } = await supabase
     .from("tasks")
-    .select("project_id, progress");
+    .select("project_id, progress")
+    .in("project_id", projectIds);
 
   if (tErr) throw tErr;
 
@@ -42,8 +56,11 @@ async function fetchProjects(): Promise<Project[]> {
 }
 
 export function useProjects() {
+  const { user } = useDemoAuth();
+
   return useQuery({
-    queryKey: ["projects"],
-    queryFn: fetchProjects,
+    queryKey: ["projects", user?.id],
+    queryFn: () => fetchProjects(user!.id),
+    enabled: !!user,
   });
 }

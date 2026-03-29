@@ -1,16 +1,24 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { AppLayout } from "@/components/AppLayout";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
-  return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+const Dashboard = () => (
+  <AppLayout>
+    <div className="max-w-4xl">
+      <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+      <p className="text-muted-foreground mt-1">Overview of your workspace activity.</p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+        {[
+          { label: "Active Projects", value: "12" },
+          { label: "Tasks Due Today", value: "5" },
+          { label: "Team Members", value: "8" },
+        ].map((stat) => (
+          <div key={stat.label} className="rounded-lg border bg-card p-5">
+            <p className="text-sm text-muted-foreground">{stat.label}</p>
+            <p className="text-3xl font-semibold mt-1">{stat.value}</p>
+          </div>
+        ))}
+      </div>
     </div>
-  );
-};
+  </AppLayout>
+);
 
-const Index = PlaceholderIndex;
-
-export default Index;
+export default Dashboard;

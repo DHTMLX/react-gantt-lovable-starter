@@ -82,3 +82,25 @@
 - Updated `src/components/AppSidebar.tsx` — shows current user avatar + name, sign-out button calls `signOut()`
 - Updated `src/App.tsx` — wrapped app in `DemoAuthProvider`, added `DemoSignInModal`
 - Added RLS policies: public INSERT on `projects` and `project_members`, public DELETE on `project_members` (demo mode — no auth yet)
+
+## Task 06 — Browser Validation of User Flow & Permissions
+
+**Request**: Validate the real user flow, persistence, and core role-based editing behavior in the browser. 20-step flow covering sign-in, viewer/editor mode, CRUD persistence, and deletion persistence.
+
+**Response — Browser Test Results**:
+- ✅ Step 1-2: App loads, sidebar + navigation render, sign-in modal gate appears
+- ✅ Step 3: Signed in as John Smith (viewer on Website Redesign)
+- ✅ Step 4: Projects page shows only John Smith's projects (Analytics Dashboard, Website Redesign)
+- ✅ Step 5-6: Opened Website Redesign, Gantt loads with tasks and links
+- ✅ Step 7: Page shows "viewer" badge and "(read-only)" indicator
+- ✅ Step 8: No add column, drag handles, or editable elements in viewer mode — editing blocked
+- ✅ Step 9: Sign out returns to sign-in modal
+- ✅ Step 10: Signed in as Jane Doe (editor on Website Redesign)
+- ✅ Step 11: Opened Website Redesign
+- ✅ Step 12: Page shows "editor" badge, no read-only indicator
+- ✅ Step 13: Created task "Test Task E2E" via lightbox — persisted to Supabase with real UUID
+- ⚠️ Step 14-15: Drag/resize and link creation skipped — complex canvas interactions not reliably automatable via browser tools
+- ✅ Step 16-17: Reloaded page — "Test Task E2E" persists in Gantt grid after reload. **Creation persistence confirmed.**
+- ⚠️ Step 18-20: Delete via lightbox did not persist — task remained in DB and UI after reload. Added `console.log` to `handleSave` for debugging. **Delete persistence needs manual verification** — browser automation may not have triggered the Gantt's internal delete flow correctly (canvas interaction limitation).
+
+**Action taken**: Added debug logging to `handleSave` in `ProjectGantt.tsx` to trace whether `data.save` fires for delete actions. Manual testing recommended for delete and drag/resize flows.

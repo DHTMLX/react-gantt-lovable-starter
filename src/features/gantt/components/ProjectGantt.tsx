@@ -60,6 +60,7 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
       item: any,
       id: string | number,
     ) => {
+      console.log("[Gantt data.save]", entity, action, id, item);
       // ── TASK CRUD ────────────────────────────────────────
       if (entity === "task") {
         const task = item as Task;

@@ -1,6 +1,7 @@
-# Project Architecture — ProjectHub
+# Project Architecture
 
 ## Stack
+
 - **Framework**: React 18 + TypeScript
 - **Build**: Vite
 - **Styling**: Tailwind CSS + shadcn/ui
@@ -8,24 +9,46 @@
 - **State**: React Query (tanstack)
 
 ## Directory Structure
+
 ```
 src/
-  components/       # Shared UI components
-    ui/             # shadcn primitives
-    AppLayout.tsx   # Shell layout (sidebar + topbar)
-    AppSidebar.tsx  # Sidebar navigation
-    ThemeToggle.tsx # Light/dark toggle
-  hooks/            # Custom hooks (use-theme, use-mobile, etc.)
-  pages/            # Route-level page components
-    Index.tsx       # Dashboard (/)
-    Projects.tsx    # Projects list (/projects)
-    ProjectDetail.tsx # Single project (/projects/:id)
-    Reports.tsx     # Reports placeholder (/reports)
-    Workload.tsx    # Workload placeholder (/workload)
-  lib/              # Utilities
+├── assets/                  # Static images and media
+├── components/              # Shared components
+│   ├── ui/                  # shadcn primitives
+│   ├── AppLayout.tsx        # Shell layout (sidebar + topbar + <Outlet />)
+│   ├── AppSidebar.tsx       # Dark sidebar navigation
+│   ├── ThemeToggle.tsx
+│   └── NavLink.tsx          # Active-aware link
+├── hooks/                   # Custom React hooks
+├── lib/                     # Utilities (cn, etc.)
+├── pages/                   # Route-level page components
+│   ├── Dashboard.tsx
+│   ├── Projects.tsx
+│   ├── ProjectDetail.tsx
+│   ├── Reports.tsx
+│   ├── Workload.tsx
+│   └── NotFound.tsx
+├── features/                # Feature-owned logic added in later phases
+│   ├── gantt/
+│   │   ├── api/             # Gantt queries and mutations
+│   │   ├── components/      # Gantt screen/view/toolbar
+│   │   ├── hooks/           # Gantt orchestration hooks
+│   │   ├── store/           # Redux/history state if introduced
+│   │   └── utils/           # Config, templates, mapping, date helpers
+│   └── projects/
+│       ├── api/             # Project queries
+│       ├── components/      # Project-specific UI blocks
+│       ├── hooks/           # Project data/access hooks
+│       └── utils/           # Project-specific helpers
+├── integrations/
+│   └── supabase/            # Supabase client and DB types
+├── App.tsx                  # Route definitions
+├── main.tsx                 # Entry point
+└── index.css                # Design system tokens
 ```
 
 ## Design System
+
 - Tokens defined in `src/index.css` (HSL variables)
 - Extended in `tailwind.config.ts`
 - Font: Inter
@@ -33,11 +56,12 @@ src/
 - Sidebar collapsed by default
 
 ## Routing
-| Path | Page |
-|------|------|
-| `/` | Dashboard |
-| `/projects` | Projects list |
-| `/projects/:id` | Project detail |
-| `/reports` | Reports (placeholder) |
-| `/workload` | Workload (placeholder) |
-| `*` | 404 Not Found |
+
+| Path            | Page                   |
+| --------------- | ---------------------- |
+| `/`             | Dashboard              |
+| `/projects`     | Projects list          |
+| `/projects/:id` | Project detail         |
+| `/reports`      | Reports (placeholder)  |
+| `/workload`     | Workload (placeholder) |
+| `*`             | 404 Not Found          |

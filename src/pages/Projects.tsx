@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProjects } from "@/features/projects/api/useProjects";
+import { CreateProjectDialog } from "@/features/projects/components/CreateProjectDialog";
 
 function statusLabel(taskCount: number, completedCount: number): string {
   if (taskCount === 0) return "Empty";
@@ -24,8 +25,13 @@ const Projects = () => {
   return (
     <AppLayout>
       <div className="max-w-4xl">
-        <h1 className="text-2xl font-semibold tracking-tight">Projects</h1>
-        <p className="text-muted-foreground mt-1">All projects in your workspace.</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">Projects</h1>
+            <p className="text-muted-foreground mt-1">Projects you have access to.</p>
+          </div>
+          <CreateProjectDialog />
+        </div>
 
         {error && (
           <p className="mt-6 text-destructive">Failed to load projects.</p>
@@ -39,7 +45,13 @@ const Projects = () => {
           </div>
         )}
 
-        {projects && (
+        {projects && projects.length === 0 && (
+          <p className="mt-6 text-muted-foreground">
+            You're not a member of any projects yet. Create one to get started.
+          </p>
+        )}
+
+        {projects && projects.length > 0 && (
           <div className="mt-6 space-y-2">
             {projects.map((p) => {
               const status = statusLabel(p.task_count, p.completed_count);

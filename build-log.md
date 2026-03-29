@@ -64,3 +64,21 @@
   - `nextSortorder()` helper derives next ordering value from current task state
 - Added RLS policies: public INSERT/UPDATE/DELETE on `tasks`, public INSERT/DELETE on `links` (no auth yet — will be locked down when auth is added)
 - Architecture: state-first optimistic updates, Supabase fire-and-forget persistence, `sortorder` preserved on normal updates
+
+## Task 05 — Demo-Only Project Permissions Layer
+
+**Request**: Implement a simple demo-only project permissions layer. Sign-in via user selection modal gate on app load. Project access through `project_members`. Viewer/editor permissions from `project_members.role`. Projects list filtered by membership. Create project UI. Member management UI. Gantt `readOnly` from role. No passwords or production auth.
+
+**Response**:
+- Created `src/features/auth/DemoAuthContext.tsx` — React context storing current demo user in state + localStorage, fetches users from `users` table, provides `signIn`/`signOut`
+- Created `src/features/auth/DemoSignInModal.tsx` — modal gate on app load, dropdown of all demo users, blocks interaction until signed in
+- Created `src/features/projects/api/useProjectRole.ts` — queries `project_members` to resolve `owner`/`editor`/`viewer` role for current user + project
+- Created `src/features/projects/components/CreateProjectDialog.tsx` — dialog to create a new project, auto-adds current user as `owner` via `project_members`
+- Created `src/features/projects/components/MemberManagement.tsx` — dialog showing project members with role badges; owners can add/remove members with role selection
+- Updated `src/features/projects/api/useProjects.ts` — filters projects by current user's `project_members` entries
+- Updated `src/pages/Projects.tsx` — added "New Project" button, empty state for no memberships
+- Updated `src/pages/ProjectDetail.tsx` — resolves role via `useProjectRole`, shows role badge, access denied for non-members, passes `readOnly` to Gantt
+- Updated `src/features/gantt/components/ProjectGantt.tsx` — accepts `readOnly` prop, disables drag/resize/add column and sets `readonly: true` in config when viewer
+- Updated `src/components/AppSidebar.tsx` — shows current user avatar + name, sign-out button calls `signOut()`
+- Updated `src/App.tsx` — wrapped app in `DemoAuthProvider`, added `DemoSignInModal`
+- Added RLS policies: public INSERT on `projects` and `project_members`, public DELETE on `project_members` (demo mode — no auth yet)

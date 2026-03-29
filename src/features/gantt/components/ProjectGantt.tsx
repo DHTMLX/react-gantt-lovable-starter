@@ -180,12 +180,13 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
         { name: "text", label: "Task", tree: true, width: "*" },
         { name: "start_date", label: "Start", align: "center", width: 90 },
         { name: "duration", label: "Days", align: "center", width: 60 },
-        { name: "add", label: "", width: 44 },
+        ...(readOnly ? [] : [{ name: "add", label: "", width: 44 }]),
       ],
-      drag_move: true,
-      drag_resize: true,
+      drag_move: !readOnly,
+      drag_resize: !readOnly,
+      readonly: readOnly,
     }),
-    [],
+    [readOnly],
   );
 
   const ganttTheme = appTheme === "dark" ? "dark" : "terrace";

@@ -1,8 +1,10 @@
 export type ZoomLevel = "hour" | "day" | "week" | "month" | "year";
 
+interface ScaleEntry { unit: string; step: number; date: string }
+
 export interface ZoomConfig {
   label: string;
-  scales: { unit: string; step: number; date: string }[];
+  scales: [ScaleEntry, ...ScaleEntry[]];
 }
 
 export const ZOOM_LEVELS: Record<ZoomLevel, ZoomConfig> = {

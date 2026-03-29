@@ -19,6 +19,7 @@ import {
 
 interface ProjectGanttProps {
   projectId: string;
+  readOnly?: boolean;
 }
 
 export default function ProjectGantt({ projectId }: ProjectGanttProps) {

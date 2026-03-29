@@ -25,3 +25,24 @@
 - Updated `AppLayout.tsx` — added `min-h-0` to `<main>` so flex children can properly fill height
 - Mock data: project "1" has a 6-task waterfall with links; other projects get a generic 3-task fallback
 - No separate theme state introduced; Gantt reads the existing `useTheme()` hook directly
+
+## Task 03 — Supabase Read Path & Seed Data
+
+**Request**: Connect Supabase for the read path and replace mock loading with real starter data. Create tables (users, projects, project_members, tasks, links) with UUID PKs, FKs, check constraints, indexes, and unique constraints. Seed 4 users, 6 projects with tasks and links. Fully connect the app — no mock data, loading/error states, filter tasks/links by project_id.
+
+**Response**:
+- Created schema migration with 5 tables: `users`, `projects`, `project_members`, `tasks`, `links`
+- All tables use `uuid` PKs with `gen_random_uuid()` defaults
+- Foreign keys: `project_members` → `projects`/`users`, `tasks` → `projects`/`tasks`(parent)/`users`(assignee), `links` → `projects`/`tasks`(source/target) — all with appropriate CASCADE rules
+- Check constraints: `tasks.progress` 0–1, `tasks.duration` ≥ 0, `tasks.type` enum, no self-parent; `links.type` enum, no self-link
+- Unique constraints: `(project_id, user_id)` on members, `(project_id, source, target, type)` on links
+- Indexes on all FK columns and common query patterns
+- RLS enabled with public read policies (no auth yet)
+- Deterministic seed: 4 users, 6 projects, tasks and links per project with explicit UUID casts
+- Created `src/features/projects/api/useProjects.ts` — fetches project list with computed task counts
+- Created `src/features/projects/api/useProject.ts` — fetches single project by ID
+- Created `src/features/gantt/api/useGanttData.ts` — fetches tasks/links filtered by `project_id`, maps DB rows to Gantt objects (`rowToGanttTask`, `rowToGanttLink`)
+- Rewrote `Projects.tsx` — uses `useProjects()`, derives status from counts, skeleton loading, error state
+- Rewrote `ProjectDetail.tsx` — uses `useProject()`, loading/error states, no mock import
+- Rewrote `ProjectGantt.tsx` — uses `useGanttData()`, syncs DB data to local state, skeleton/error states
+- Removed all mock data references

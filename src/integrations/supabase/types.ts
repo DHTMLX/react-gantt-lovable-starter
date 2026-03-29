@@ -14,7 +14,194 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      links: {
+        Row: {
+          created_at: string
+          id: string
+          project_id: string
+          source: string
+          target: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          project_id: string
+          source: string
+          target: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          project_id?: string
+          source?: string
+          target?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "links_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "links_source_fkey"
+            columns: ["source"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "links_target_fkey"
+            columns: ["target"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_members: {
+        Row: {
+          id: string
+          project_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          assignee_user_id: string | null
+          created_at: string
+          duration: number | null
+          id: string
+          parent_id: string | null
+          progress: number
+          project_id: string
+          sortorder: number
+          start_date: string | null
+          text: string
+          type: string
+        }
+        Insert: {
+          assignee_user_id?: string | null
+          created_at?: string
+          duration?: number | null
+          id?: string
+          parent_id?: string | null
+          progress?: number
+          project_id: string
+          sortorder?: number
+          start_date?: string | null
+          text: string
+          type?: string
+        }
+        Update: {
+          assignee_user_id?: string | null
+          created_at?: string
+          duration?: number | null
+          id?: string
+          parent_id?: string | null
+          progress?: number
+          project_id?: string
+          sortorder?: number
+          start_date?: string | null
+          text?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_assignee_user_id_fkey"
+            columns: ["assignee_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          email: string
+          full_name: string
+          id: string
+          username: string
+        }
+        Insert: {
+          email: string
+          full_name: string
+          id?: string
+          username: string
+        }
+        Update: {
+          email?: string
+          full_name?: string
+          id?: string
+          username?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -104,3 +104,51 @@
 - ⚠️ Step 18-20: Delete via lightbox did not persist — task remained in DB and UI after reload. Added `console.log` to `handleSave` for debugging. **Delete persistence needs manual verification** — browser automation may not have triggered the Gantt's internal delete flow correctly (canvas interaction limitation).
 
 **Action taken**: Added debug logging to `handleSave` in `ProjectGantt.tsx` to trace whether `data.save` fires for delete actions. Manual testing recommended for delete and drag/resize flows.
+
+## Task 07 — Gantt Toolbar, Zoom, Undo/Redo, and Row Reorder Persistence
+
+**Request**: Add a Gantt toolbar with zoom and undo/redo controls, and make row reorder persist correctly. Use Redux Toolkit for Gantt history state. Zoom: hour/day/week/month/year. Undo/redo must be stable across Redux history, Supabase sync, and rehydration. Row reorder: detect via `target` in update payload, rebuild full sortorder, persist all affected rows, include `parent_id` if hierarchy changes.
+
+**Response**:
+
+### Redux Toolkit State Layer
+- Created `src/features/gantt/store/types.ts` — `SerializedTask`, `SerializedLink`, `GanttSnapshot` interfaces with ISO string dates for serializable Redux state
+- Created `src/features/gantt/store/serialization.ts` — `serializeTask`/`deserializeTask`/`serializeLink`/`deserializeLink` converters between Gantt Date objects and serializable forms
+- Created `src/features/gantt/store/ganttSlice.ts` — Redux slice with:
+  - `hydrate` — loads DB data into present without clearing undo/redo history
+  - `commit` — pushes current to past, sets new present, clears future (max 50 entries)
+  - `patch` — updates present in-place without history (e.g. ID replacement)
+  - `undo`/`redo` — standard history navigation
+  - `reset` — clears everything (project switch)
+- Created `src/features/gantt/store/index.ts` — Redux store with typed hooks (`useAppDispatch`, `useAppSelector`)
+
+### Gantt Toolbar
+- Created `src/features/gantt/components/GanttToolbar.tsx` — toolbar with:
+  - Zoom in/out buttons + dropdown selector (hour/day/week/month/year)
+  - Undo/redo buttons (hidden in readOnly mode)
+  - Styled with semantic design tokens
+- Created `src/features/gantt/utils/zoom.ts` — zoom level configs with proper scale definitions
+
+### Row Reorder Persistence
+- Detects reorder via `target` property in task update payload
+- Rebuilds full ordered task list in memory, splicing moved task to new position
+- Recomputes `sortorder` for all tasks (1-indexed)
+- Persists `sortorder` and `parent_id` for all affected rows via parallel Supabase updates
+- After reload, tasks restore in correct order via `order("sortorder")`
+
+### Integration
+- Rewrote `src/features/gantt/components/ProjectGantt.tsx` — replaced `useState` with Redux state, all CRUD operations now go through `commit`/`patch`, ID replacements use `patch` (no history push), reorder uses dedicated flow
+- Updated `src/App.tsx` — wrapped app in `ReduxProvider`
+- Gantt config includes `order_branch: "marker"` and `order_branch_free: true` for drag reorder
+
+### Files Created
+- `src/features/gantt/store/types.ts`
+- `src/features/gantt/store/serialization.ts`
+- `src/features/gantt/store/ganttSlice.ts`
+- `src/features/gantt/store/index.ts`
+- `src/features/gantt/utils/zoom.ts`
+- `src/features/gantt/components/GanttToolbar.tsx`
+
+### Files Modified
+- `src/features/gantt/components/ProjectGantt.tsx`
+- `src/App.tsx`

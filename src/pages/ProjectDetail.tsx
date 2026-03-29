@@ -1,17 +1,30 @@
 import { useParams, Link } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
-import { mockProjects } from "@/pages/Projects";
 import { ArrowLeft } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useProject } from "@/features/projects/api/useProject";
 import ProjectGantt from "@/features/gantt/components/ProjectGantt";
 
 const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const project = mockProjects.find((p) => p.id === id);
+  const { data: project, isLoading, error } = useProject(id);
 
-  if (!project) {
+  if (isLoading) {
     return (
       <AppLayout>
-        <p className="text-muted-foreground">Project not found.</p>
+        <Skeleton className="h-8 w-48 mb-2" />
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="mt-6 h-[400px] w-full rounded-lg" />
+      </AppLayout>
+    );
+  }
+
+  if (error || !project) {
+    return (
+      <AppLayout>
+        <p className="text-muted-foreground">
+          {error ? "Failed to load project." : "Project not found."}
+        </p>
       </AppLayout>
     );
   }
@@ -27,9 +40,6 @@ const ProjectDetail = () => {
             <ArrowLeft className="h-4 w-4" /> Back to Projects
           </Link>
           <h1 className="text-2xl font-semibold tracking-tight">{project.name}</h1>
-          <p className="text-muted-foreground mt-1">
-            {project.completed}/{project.tasks} tasks · {project.status}
-          </p>
         </div>
         <div className="flex-1 min-h-0 px-6 pb-6">
           <ProjectGantt projectId={project.id} />

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, useEffect } from "react";
+import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import Gantt, {
   type GanttConfig,
   type Link,
@@ -9,6 +9,13 @@ import "@dhtmlx/trial-react-gantt/dist/react-gantt.css";
 import { useTheme } from "@/hooks/use-theme";
 import { useGanttData } from "@/features/gantt/api/useGanttData";
 import { Skeleton } from "@/components/ui/skeleton";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  isRealUUID,
+  buildTaskInsert,
+  buildTaskUpdate,
+  buildLinkInsert,
+} from "@/features/gantt/utils/payload";
 
 interface ProjectGanttProps {
   projectId: string;
@@ -30,6 +37,134 @@ export default function ProjectGantt({ projectId }: ProjectGanttProps) {
   useEffect(() => {
     if (dbLinks.length > 0 || !isLoading) setLinks(dbLinks);
   }, [dbLinks, isLoading]);
+
+  // ── Next sortorder helper ──────────────────────────────────
+  const nextSortorder = useCallback((): number => {
+    let max = 0;
+    // Read from latest state via functional ref isn't possible here,
+    // but we can read the current tasks array (it's from useState).
+    for (const t of tasks) {
+      const so = (t as any).sortorder ?? 0;
+      if (so > max) max = so;
+    }
+    return max + 1;
+  }, [tasks]);
+
+  // ── CRUD handlers ──────────────────────────────────────────
+
+  const handleSave = useCallback(
+    async (
+      entity: string,
+      action: string,
+      item: any,
+      id: string | number,
+    ) => {
+      // ── TASK CRUD ────────────────────────────────────────
+      if (entity === "task") {
+        const task = item as Task;
+
+        if (action === "create") {
+          const sortorder = nextSortorder();
+          // Optimistic: add with temp id
+          setTasks((prev) => [...prev, { ...task, sortorder } as any]);
+
+          const payload = buildTaskInsert(task, projectId, sortorder);
+          const { data, error: err } = await supabase
+            .from("tasks")
+            .insert(payload)
+            .select("id")
+            .single();
+
+          if (data) {
+            // Replace temp id with real UUID
+            const realId = data.id;
+            setTasks((prev) =>
+              prev.map((t) => (t.id === task.id ? { ...t, id: realId } : t)),
+            );
+            // Also update any links referencing the temp id
+            setLinks((prev) =>
+              prev.map((l) => ({
+                ...l,
+                source: l.source === task.id ? realId : l.source,
+                target: l.target === task.id ? realId : l.target,
+              })),
+            );
+          }
+          if (err) console.error("Task insert failed:", err);
+        }
+
+        if (action === "update") {
+          // Optimistic update
+          setTasks((prev) =>
+            prev.map((t) => (t.id === id ? (task as Task) : t)),
+          );
+
+          if (isRealUUID(String(id))) {
+            const payload = buildTaskUpdate(task);
+            const { error: err } = await supabase
+              .from("tasks")
+              .update(payload)
+              .eq("id", String(id));
+            if (err) console.error("Task update failed:", err);
+          }
+        }
+
+        if (action === "delete") {
+          setTasks((prev) => prev.filter((t) => t.id !== id));
+
+          if (isRealUUID(String(id))) {
+            const { error: err } = await supabase
+              .from("tasks")
+              .delete()
+              .eq("id", String(id));
+            if (err) console.error("Task delete failed:", err);
+          }
+        }
+      }
+
+      // ── LINK CRUD ────────────────────────────────────────
+      if (entity === "link") {
+        const link = item as Link;
+
+        if (action === "create") {
+          // Optimistic
+          setLinks((prev) => [...prev, link]);
+
+          const payload = buildLinkInsert(link, projectId);
+          if (payload) {
+            const { data, error: err } = await supabase
+              .from("links")
+              .insert(payload)
+              .select("id")
+              .single();
+
+            if (data) {
+              const realId = data.id;
+              setLinks((prev) =>
+                prev.map((l) => (l.id === link.id ? { ...l, id: realId } : l)),
+              );
+            }
+            if (err) console.error("Link insert failed:", err);
+          }
+        }
+
+        if (action === "delete") {
+          setLinks((prev) => prev.filter((l) => l.id !== id));
+
+          if (isRealUUID(String(id))) {
+            const { error: err } = await supabase
+              .from("links")
+              .delete()
+              .eq("id", String(id));
+            if (err) console.error("Link delete failed:", err);
+          }
+        }
+      }
+    },
+    [projectId, nextSortorder],
+  );
+
+  // ── Config ─────────────────────────────────────────────────
 
   const config: GanttConfig = useMemo(
     () => ({
@@ -70,20 +205,7 @@ export default function ProjectGantt({ projectId }: ProjectGanttProps) {
         links={links}
         config={config}
         theme={ganttTheme}
-        data={{
-          save: (entity, action, item, id) => {
-            if (entity === "task") {
-              if (action === "create") setTasks((prev) => [...prev, item as Task]);
-              if (action === "update") setTasks((prev) => prev.map((t) => (t.id === id ? (item as Task) : t)));
-              if (action === "delete") setTasks((prev) => prev.filter((t) => t.id !== id));
-            }
-            if (entity === "link") {
-              if (action === "create") setLinks((prev) => [...prev, item as Link]);
-              if (action === "update") setLinks((prev) => prev.map((l) => (l.id === id ? (item as Link) : l)));
-              if (action === "delete") setLinks((prev) => prev.filter((l) => l.id !== id));
-            }
-          },
-        }}
+        data={{ save: handleSave }}
       />
     </div>
   );

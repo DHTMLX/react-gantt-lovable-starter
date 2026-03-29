@@ -46,3 +46,21 @@
 - Rewrote `ProjectDetail.tsx` — uses `useProject()`, loading/error states, no mock import
 - Rewrote `ProjectGantt.tsx` — uses `useGanttData()`, syncs DB data to local state, skeleton/error states
 - Removed all mock data references
+
+## Task 04 — Gantt CRUD Persistence via data.save
+
+**Request**: Implement Gantt CRUD persistence via data.save. Scope: task create/update/delete, link create/delete. React state as source of truth, Supabase as persistence layer. Persist task ordering via `sortorder`. Replace temp Gantt IDs with real UUIDs after insert. Use stable local date conversion helpers. Build write payloads from normalized local task model. Persist `parent_id` only if real UUID. Persist links only when both ends have real UUIDs. Optimistic updates from latest state.
+
+**Response**:
+- Created `src/features/gantt/utils/date.ts` — `dateToISO()` and `isoToDate()` conversion helpers
+- Created `src/features/gantt/utils/payload.ts` — `buildTaskInsert()`, `buildTaskUpdate()`, `buildLinkInsert()`, `isRealUUID()` payload builders that normalize Gantt objects into Supabase write payloads
+- Rewrote `src/features/gantt/components/ProjectGantt.tsx`:
+  - `data.save` callback handles task create/update/delete and link create/delete
+  - Task create: optimistic add → Supabase insert → replace temp ID with real UUID in both tasks and links state
+  - Task update: optimistic update → Supabase update (only for real UUIDs), preserves existing `sortorder`
+  - Task delete: optimistic remove → Supabase delete (only for real UUIDs)
+  - Link create: optimistic add → only persists when both source/target are real UUIDs → replaces temp link ID
+  - Link delete: optimistic remove → Supabase delete (only for real UUIDs)
+  - `nextSortorder()` helper derives next ordering value from current task state
+- Added RLS policies: public INSERT/UPDATE/DELETE on `tasks`, public INSERT/DELETE on `links` (no auth yet — will be locked down when auth is added)
+- Architecture: state-first optimistic updates, Supabase fire-and-forget persistence, `sortorder` preserved on normal updates

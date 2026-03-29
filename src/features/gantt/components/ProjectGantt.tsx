@@ -22,7 +22,7 @@ interface ProjectGanttProps {
   readOnly?: boolean;
 }
 
-export default function ProjectGantt({ projectId }: ProjectGanttProps) {
+export default function ProjectGantt({ projectId, readOnly = false }: ProjectGanttProps) {
   const ganttRef = useRef<ReactGanttRef>(null);
   const { theme: appTheme } = useTheme();
   const { tasks: dbTasks, links: dbLinks, isLoading, error } = useGanttData(projectId);

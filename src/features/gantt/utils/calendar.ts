@@ -1,5 +1,3 @@
-import type { Calendar } from "@dhtmlx/trial-react-gantt";
-
 /**
  * Single source of truth for non-working time rules.
  *
@@ -12,10 +10,15 @@ export function isNonWorkingDay(date: Date): boolean {
   return NON_WORKING_DAYS.has(date.getDay());
 }
 
-export const PROJECT_CALENDAR: Calendar = {
+/**
+ * Calendar definition passed to the Gantt `calendars` prop.
+ * Shape matches the DHTMLX calendar config (typed as `any`
+ * because the trial type definition is incomplete).
+ */
+export const PROJECT_CALENDAR = {
   id: "global",
   worktime: {
     hours: [8, 17],
     days: [0, 1, 1, 1, 1, 1, 0], // Sun=0 … Sat=0
   },
-};
+} as any;

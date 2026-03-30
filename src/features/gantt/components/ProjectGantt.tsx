@@ -428,6 +428,8 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
           tasks={tasks}
           links={links}
           config={config}
+          templates={templates}
+          calendars={[PROJECT_CALENDAR]}
           theme={ganttTheme}
           data={{ save: handleSave }}
         />

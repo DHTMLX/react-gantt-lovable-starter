@@ -43,6 +43,7 @@ export function buildTaskInsert(
   projectId: string,
   sortorder: number,
 ): TaskInsertPayload {
+  const assignee = (task as any).assignee_user_id;
   return {
     project_id: projectId,
     text: task.text ?? "New task",
@@ -52,6 +53,7 @@ export function buildTaskInsert(
     parent_id: isRealUUID(task.parent as string) ? String(task.parent) : null,
     sortorder,
     type: task.type ?? "task",
+    assignee_user_id: isRealUUID(assignee) ? assignee : null,
   };
 }
 

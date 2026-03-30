@@ -369,9 +369,7 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
           align: "center" as const,
           template: (resource: any) => {
             const items = tasks.filter(
-              (t) =>
-                t.type !== "project" &&
-                ((t as any).assignee_user_id ?? "unassigned") === resource.id,
+              (t) => t.type !== "project" && ((t as any).assignee_user_id ?? "unassigned") === resource.id,
             );
             const dur = items.reduce((sum, t) => sum + (t.duration || 0), 0);
             return `${dur * 8}h`;
@@ -385,7 +383,7 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
   // ── Config ─────────────────────────────────────────────────
   const config: GanttConfig = useMemo(
     () => ({
-      grid_width: 340,
+      grid_width: 550,
       row_height: 36,
       bar_height: 24,
       scales: ZOOM_LEVELS[zoom].scales,

@@ -26,6 +26,7 @@ export interface TaskInsertPayload {
   parent_id: string | null;
   sortorder: number;
   type: string;
+  assignee_user_id: string | null;
 }
 
 export interface TaskUpdatePayload {
@@ -35,7 +36,7 @@ export interface TaskUpdatePayload {
   progress?: number;
   parent_id?: string | null;
   type?: string;
-  // sortorder intentionally omitted — only a dedicated reorder flow should change it
+  assignee_user_id?: string | null;
 }
 
 export function buildTaskInsert(

@@ -395,8 +395,7 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
 
   const templates: GanttTemplates = useMemo(
     () => ({
-      timeline_cell_class: (date: Date) =>
-        isNonWorkingDay(date) ? "weekend-cell" : "",
+      timeline_cell_class: (_item: Task, date: Date) => (isNonWorkingDay(date) ? "weekend-cell" : ""),
     }),
     [],
   );

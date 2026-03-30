@@ -33,7 +33,8 @@ function rowToGanttTask(row: TaskRow): GanttTask {
     parent: row.parent_id ?? 0,
     type: row.type as GanttTask["type"],
     open: row.type === "project",
-  };
+    assignee_user_id: row.assignee_user_id ?? "unassigned",
+  } as any;
 }
 
 function rowToGanttLink(row: LinkRow): GanttLink {

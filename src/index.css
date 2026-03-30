@@ -104,3 +104,37 @@
 .weekend-cell {
   background-color: hsl(var(--muted) / 0.45) !important;
 }
+
+/* Resource panel cells */
+.gantt-res-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gantt-res-cell--ok {
+  background-color: hsl(var(--accent) / 0.3) !important;
+}
+.gantt-res-cell--over {
+  background-color: hsl(var(--destructive) / 0.12) !important;
+}
+
+/* Resource timeline badges */
+.gantt-res-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+.gantt-res-badge--ok {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+.gantt-res-badge--over {
+  background-color: hsl(var(--destructive));
+  color: hsl(var(--destructive-foreground));
+}

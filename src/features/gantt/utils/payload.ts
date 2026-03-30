@@ -26,6 +26,7 @@ export interface TaskInsertPayload {
   parent_id: string | null;
   sortorder: number;
   type: string;
+  assignee_user_id: string | null;
 }
 
 export interface TaskUpdatePayload {
@@ -35,7 +36,7 @@ export interface TaskUpdatePayload {
   progress?: number;
   parent_id?: string | null;
   type?: string;
-  // sortorder intentionally omitted — only a dedicated reorder flow should change it
+  assignee_user_id?: string | null;
 }
 
 export function buildTaskInsert(
@@ -43,6 +44,7 @@ export function buildTaskInsert(
   projectId: string,
   sortorder: number,
 ): TaskInsertPayload {
+  const assignee = (task as any).assignee_user_id;
   return {
     project_id: projectId,
     text: task.text ?? "New task",
@@ -52,10 +54,12 @@ export function buildTaskInsert(
     parent_id: isRealUUID(task.parent as string) ? String(task.parent) : null,
     sortorder,
     type: task.type ?? "task",
+    assignee_user_id: isRealUUID(assignee) ? assignee : null,
   };
 }
 
 export function buildTaskUpdate(task: GanttTask): TaskUpdatePayload {
+  const assignee = (task as any).assignee_user_id;
   return {
     text: task.text,
     start_date: dateToISO(task.start_date as Date | null),
@@ -63,6 +67,7 @@ export function buildTaskUpdate(task: GanttTask): TaskUpdatePayload {
     progress: Number(task.progress) || 0,
     parent_id: isRealUUID(task.parent as string) ? String(task.parent) : null,
     type: task.type ?? "task",
+    assignee_user_id: isRealUUID(assignee) ? assignee : null,
   };
 }
 

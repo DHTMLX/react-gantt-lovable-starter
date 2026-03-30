@@ -369,9 +369,7 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
           align: "center" as const,
           template: (resource: any) => {
             const items = tasks.filter(
-              (t) =>
-                t.type !== "project" &&
-                ((t as any).assignee_user_id ?? "unassigned") === resource.id,
+              (t) => t.type !== "project" && ((t as any).assignee_user_id ?? "unassigned") === resource.id,
             );
             const dur = items.reduce((sum, t) => sum + (t.duration || 0), 0);
             return `${dur * 8}h`;
@@ -449,6 +447,7 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
       },
       drag_move: !readOnly,
       drag_resize: !readOnly,
+      grid_width: 550,
       readonly: readOnly,
       order_branch: !readOnly ? "marker" : undefined,
       order_branch_free: !readOnly,

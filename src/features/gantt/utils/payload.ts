@@ -58,6 +58,7 @@ export function buildTaskInsert(
 }
 
 export function buildTaskUpdate(task: GanttTask): TaskUpdatePayload {
+  const assignee = (task as any).assignee_user_id;
   return {
     text: task.text,
     start_date: dateToISO(task.start_date as Date | null),
@@ -65,6 +66,7 @@ export function buildTaskUpdate(task: GanttTask): TaskUpdatePayload {
     progress: Number(task.progress) || 0,
     parent_id: isRealUUID(task.parent as string) ? String(task.parent) : null,
     type: task.type ?? "task",
+    assignee_user_id: isRealUUID(assignee) ? assignee : null,
   };
 }
 

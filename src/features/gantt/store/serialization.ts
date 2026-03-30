@@ -1,13 +1,10 @@
 import type { Task as GanttTask, Link as GanttLink } from "@dhtmlx/trial-react-gantt";
 import type { SerializedTask, SerializedLink } from "./types";
+import { dateToISO, isoToDate } from "@/features/gantt/utils/date";
 
 /** Convert a Gantt Task (with Date objects) to a serializable form. */
 export function serializeTask(t: GanttTask): SerializedTask {
-  const startDate = t.start_date instanceof Date
-    ? t.start_date.toISOString()
-    : typeof t.start_date === "string"
-      ? t.start_date
-      : null;
+  const startDate = dateToISO(t.start_date as Date | string | null | undefined);
 
   return {
     id: t.id,
@@ -24,11 +21,13 @@ export function serializeTask(t: GanttTask): SerializedTask {
 }
 
 /** Convert a serialized task back to a Gantt Task (with Date objects). */
-export function deserializeTask(s: SerializedTask): GanttTask & { sortorder: number; assignee_user_id?: string | null } {
+export function deserializeTask(
+  s: SerializedTask,
+): GanttTask & { sortorder: number; assignee_user_id?: string | null } {
   return {
     id: s.id,
     text: s.text,
-    start_date: s.start_date ? new Date(s.start_date) : new Date(),
+    start_date: isoToDate(s.start_date),
     duration: s.duration,
     progress: s.progress,
     parent: s.parent,

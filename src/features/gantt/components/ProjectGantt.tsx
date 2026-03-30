@@ -395,15 +395,15 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
           name: "owner",
           label: "Owner",
           align: "center",
-          width: 100,
+          width: 110,
           template: (task: any) => {
             const r = resources.find((r) => r.id === (task.assignee_user_id ?? "unassigned"));
             return r?.text ?? "Unassigned";
           },
         },
-        { name: "start_date", label: "Start", align: "center", width: 90 },
-        { name: "duration", label: "Days", align: "center", width: 60 },
-        ...(readOnly ? [] : [{ name: "add", label: "", width: 44 }]),
+        { name: "start_date", label: "Start", align: "center", width: 120 },
+        { name: "duration", label: "Days", align: "center", width: 40 },
+        ...(readOnly ? [] : [{ name: "add", label: "", width: 40 }]),
       ],
       lightbox: {
         sections: [

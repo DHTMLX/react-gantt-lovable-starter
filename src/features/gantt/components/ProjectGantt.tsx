@@ -387,8 +387,18 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
       readonly: readOnly,
       order_branch: !readOnly ? "marker" : undefined,
       order_branch_free: !readOnly,
+      work_time: true,
+      skip_off_time: false,
     }),
     [readOnly, zoom],
+  );
+
+  const templates: GanttTemplates = useMemo(
+    () => ({
+      timeline_cell_class: (date: Date) =>
+        isNonWorkingDay(date) ? "weekend-cell" : "",
+    }),
+    [],
   );
 
   const ganttTheme = appTheme === "dark" ? "dark" : "terrace";

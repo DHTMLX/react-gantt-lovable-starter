@@ -12,6 +12,8 @@ import { serializeTask, serializeLink, deserializeTask, deserializeLink } from "
 import type { GanttSnapshot, SerializedTask, SerializedLink } from "@/features/gantt/store/types";
 import { GanttToolbar } from "./GanttToolbar";
 import { ZOOM_LEVELS, type ZoomLevel } from "@/features/gantt/utils/zoom";
+import { PROJECT_CALENDAR, isNonWorkingDay } from "@/features/gantt/utils/calendar";
+import type { GanttTemplates } from "@dhtmlx/trial-react-gantt";
 
 interface ProjectGanttProps {
   projectId: string;
@@ -385,8 +387,18 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
       readonly: readOnly,
       order_branch: !readOnly ? "marker" : undefined,
       order_branch_free: !readOnly,
+      work_time: true,
+      skip_off_time: false,
     }),
     [readOnly, zoom],
+  );
+
+  const templates: GanttTemplates = useMemo(
+    () => ({
+      timeline_cell_class: (date: Date) =>
+        isNonWorkingDay(date) ? "weekend-cell" : "",
+    }),
+    [],
   );
 
   const ganttTheme = appTheme === "dark" ? "dark" : "terrace";
@@ -416,6 +428,8 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
           tasks={tasks}
           links={links}
           config={config}
+          templates={templates}
+          calendars={[PROJECT_CALENDAR]}
           theme={ganttTheme}
           data={{ save: handleSave }}
         />

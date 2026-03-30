@@ -99,3 +99,8 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
 }
+
+/* Gantt weekend highlighting */
+.weekend-cell {
+  background-color: hsl(var(--muted) / 0.45) !important;
+}

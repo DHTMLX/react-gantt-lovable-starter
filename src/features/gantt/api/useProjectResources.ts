@@ -1,8 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { Resource } from "@dhtmlx/trial-react-gantt";
+
+interface Resource { id: string | number; text: string; [key: string]: any; }
 
 const UNASSIGNED_RESOURCE: Resource = { id: "unassigned", text: "Unassigned" };
+
+export type { Resource };
 
 export function useProjectResources(projectId: string | undefined) {
   return useQuery({

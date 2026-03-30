@@ -9,7 +9,7 @@ import { isRealUUID, buildTaskInsert, buildTaskUpdate, buildLinkInsert } from "@
 import { useAppDispatch, useAppSelector } from "@/features/gantt/store";
 import { hydrate, reset, commit, patch, undo, redo } from "@/features/gantt/store/ganttSlice";
 import { serializeTask, serializeLink, deserializeTask, deserializeLink } from "@/features/gantt/store/serialization";
-import type { SerializedTask, SerializedLink } from "@/features/gantt/store/types";
+import type { GanttSnapshot, SerializedTask, SerializedLink } from "@/features/gantt/store/types";
 import { GanttToolbar } from "./GanttToolbar";
 import { ZOOM_LEVELS, type ZoomLevel } from "@/features/gantt/utils/zoom";
 
@@ -27,8 +27,12 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
   const { past, present, future } = useAppSelector((s) => s.gantt);
   const presentRef = useRef(present);
   presentRef.current = present;
+  const pastRef = useRef(past);
+  pastRef.current = past;
+  const futureRef = useRef(future);
+  futureRef.current = future;
 
-  const [zoom, setZoom] = useState<ZoomLevel>("week");
+  const [zoom, setZoom] = useState<ZoomLevel>("day");
 
   // Derive live Gantt arrays from Redux (deserialize dates)
   const tasks: Task[] = useMemo(() => present.tasks.map(deserializeTask), [present.tasks]);
@@ -63,6 +67,76 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
     }
     return max + 1;
   }, []);
+
+  const persistSnapshot = useCallback(
+    async (previousSnapshot: GanttSnapshot, nextSnapshot: GanttSnapshot) => {
+      const nextTaskRows = nextSnapshot.tasks
+        .filter((task) => isRealUUID(String(task.id)))
+        .map((task) => ({
+          id: String(task.id),
+          project_id: projectId,
+          text: task.text,
+          start_date: task.start_date,
+          duration: task.duration,
+          progress: task.progress,
+          parent_id: isRealUUID(String(task.parent)) ? String(task.parent) : null,
+          sortorder: task.sortorder,
+          type: task.type ?? "task",
+          assignee_user_id: task.assignee_user_id ?? null,
+        }));
+
+      const previousTaskIds = new Set(
+        previousSnapshot.tasks.filter((task) => isRealUUID(String(task.id))).map((task) => String(task.id)),
+      );
+      const nextTaskIds = new Set(nextTaskRows.map((task) => task.id));
+      const deletedTaskIds = [...previousTaskIds].filter((id) => !nextTaskIds.has(id));
+
+      if (nextTaskRows.length > 0) {
+        const { error } = await supabase.from("tasks").upsert(nextTaskRows);
+        if (error) throw error;
+      }
+
+      if (deletedTaskIds.length > 0) {
+        const { error } = await supabase.from("tasks").delete().in("id", deletedTaskIds);
+        if (error) throw error;
+      }
+
+      const previousLinks = new Map(
+        previousSnapshot.links
+          .filter((link) => isRealUUID(String(link.id)))
+          .map((link) => [String(link.id), link] as const),
+      );
+      const nextLinks = new Map(
+        nextSnapshot.links
+          .filter(
+            (link) => isRealUUID(String(link.id)) && isRealUUID(String(link.source)) && isRealUUID(String(link.target)),
+          )
+          .map((link) => [String(link.id), link] as const),
+      );
+
+      const deletedLinkIds = [...previousLinks.keys()].filter((id) => !nextLinks.has(id));
+      const insertedLinks = [...nextLinks.entries()]
+        .filter(([id]) => !previousLinks.has(id))
+        .map(([, link]) => ({
+          id: String(link.id),
+          project_id: projectId,
+          source: String(link.source),
+          target: String(link.target),
+          type: String(link.type),
+        }));
+
+      if (deletedLinkIds.length > 0) {
+        const { error } = await supabase.from("links").delete().in("id", deletedLinkIds);
+        if (error) throw error;
+      }
+
+      if (insertedLinks.length > 0) {
+        const { error } = await supabase.from("links").insert(insertedLinks);
+        if (error) throw error;
+      }
+    },
+    [projectId],
+  );
 
   // ── Row reorder ────────────────────────────────────────────
   const handleReorder = useCallback(
@@ -138,7 +212,6 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
   // ── CRUD handler ───────────────────────────────────────────
   const handleSave = useCallback(
     async (entity: string, action: string, item: any, id: string | number) => {
-      console.log("[Gantt data.save]", entity, action, id, item);
       const currentSnapshot = presentRef.current;
 
       // ── TASK CRUD ────────────────────────────────────────
@@ -268,8 +341,31 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
   );
 
   // ── Undo/Redo handlers ────────────────────────────────────
-  const handleUndo = useCallback(() => dispatch(undo()), [dispatch]);
-  const handleRedo = useCallback(() => dispatch(redo()), [dispatch]);
+  const handleUndo = useCallback(async () => {
+    const previousSnapshot = presentRef.current;
+    const targetSnapshot = pastRef.current[pastRef.current.length - 1];
+    if (!targetSnapshot) return;
+
+    dispatch(undo());
+    try {
+      await persistSnapshot(previousSnapshot, targetSnapshot);
+    } catch (err) {
+      console.error("Undo persistence failed:", err);
+    }
+  }, [dispatch, persistSnapshot]);
+
+  const handleRedo = useCallback(async () => {
+    const previousSnapshot = presentRef.current;
+    const targetSnapshot = futureRef.current[0];
+    if (!targetSnapshot) return;
+
+    dispatch(redo());
+    try {
+      await persistSnapshot(previousSnapshot, targetSnapshot);
+    } catch (err) {
+      console.error("Redo persistence failed:", err);
+    }
+  }, [dispatch, persistSnapshot]);
 
   // ── Config ─────────────────────────────────────────────────
   const config: GanttConfig = useMemo(

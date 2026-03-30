@@ -152,3 +152,15 @@
 ### Files Modified
 - `src/features/gantt/components/ProjectGantt.tsx`
 - `src/App.tsx`
+
+## Task 08 — Working-time and weekend behavior
+
+**Request**: Add working-time and weekend behavior. Keep one source of truth for non-working time rules. Add a working calendar and weekend highlighting.
+
+**Response**:
+- Created `src/features/gantt/utils/calendar.ts` as the single source of truth for non-working time (weekends Sat/Sun, working hours 08–17).
+- Exported `PROJECT_CALENDAR` (passed to `<Gantt calendars={…}>`) and `isNonWorkingDay()` helper.
+- Enabled `work_time: true` in Gantt config so the engine respects the calendar for scheduling.
+- Added `timeline_cell_class` template to apply `.weekend-cell` CSS class to non-working day columns.
+- Added `.weekend-cell` style in `index.css` using the `--muted` design token for themed highlighting.
+- Set `skip_off_time: false` so weekends remain visible but visually distinct.

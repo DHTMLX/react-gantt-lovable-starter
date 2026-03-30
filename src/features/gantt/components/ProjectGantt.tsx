@@ -3,6 +3,7 @@ import Gantt, { type GanttConfig, type Link, type ReactGanttRef, type Task } fro
 import "@dhtmlx/trial-react-gantt/dist/react-gantt.css";
 import { useTheme } from "@/hooks/use-theme";
 import { useGanttData } from "@/features/gantt/api/useGanttData";
+import { useProjectResources } from "@/features/gantt/api/useProjectResources";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { isRealUUID, buildTaskInsert, buildTaskUpdate, buildLinkInsert } from "@/features/gantt/utils/payload";
@@ -24,6 +25,7 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
   const ganttRef = useRef<ReactGanttRef>(null);
   const { theme: appTheme } = useTheme();
   const { tasks: dbTasks, links: dbLinks, isLoading, error } = useGanttData(projectId);
+  const { data: resources = [] } = useProjectResources(projectId);
 
   const dispatch = useAppDispatch();
   const { past, present, future } = useAppSelector((s) => s.gantt);
@@ -148,43 +150,31 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
       const targetId = moved.target;
       const newParent = moved.parent;
 
-      // Build the current ordered list
       const currentTasks = [...currentSnapshot.tasks];
-
-      // Remove the moved task from its current position
       const movedIdx = currentTasks.findIndex((t) => t.id === moved.id);
       if (movedIdx === -1) return;
       const [movedItem] = currentTasks.splice(movedIdx, 1);
 
-      // Update parent if changed
       const updatedItem: SerializedTask = {
         ...movedItem,
         parent: newParent ?? movedItem.parent,
       };
 
-      // Find target position
       let insertIdx: number;
       if (!targetId) {
-        // Dropped at the end
         insertIdx = currentTasks.length;
       } else {
         const targetIdx = currentTasks.findIndex((t) => t.id === targetId);
-        if (targetIdx === -1) {
-          insertIdx = currentTasks.length;
-        } else {
-          insertIdx = targetIdx;
-        }
+        insertIdx = targetIdx === -1 ? currentTasks.length : targetIdx;
       }
 
       currentTasks.splice(insertIdx, 0, updatedItem);
 
-      // Recompute sortorder for all tasks
       const reordered = currentTasks.map((t, i) => ({
         ...t,
         sortorder: i + 1,
       }));
 
-      // Commit to Redux (with history)
       dispatch(
         commit({
           tasks: reordered,
@@ -192,7 +182,6 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
         }),
       );
 
-      // Persist all affected sortorders + parent_id to Supabase
       const updates = reordered
         .filter((t) => isRealUUID(String(t.id)))
         .map((t) => ({
@@ -201,7 +190,6 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
           parent_id: isRealUUID(String(t.parent)) ? String(t.parent) : null,
         }));
 
-      // Batch update via individual calls (Supabase doesn't support batch upsert on non-PK)
       await Promise.all(
         updates.map(({ id, sortorder, parent_id }) =>
           supabase.from("tasks").update({ sortorder, parent_id }).eq("id", id),
@@ -214,13 +202,12 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
   // ── CRUD handler ───────────────────────────────────────────
   const handleSave = useCallback(
     async (entity: string, action: string, item: any, id: string | number) => {
+      console.log("[Gantt data.save]", entity, action, id, item);
       const currentSnapshot = presentRef.current;
 
-      // ── TASK CRUD ────────────────────────────────────────
       if (entity === "task") {
         const task = item as Task;
 
-        // Detect row reorder: task update with a `target` property
         if (action === "update" && "target" in (item as any)) {
           await handleReorder(task);
           return;
@@ -243,7 +230,6 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
 
           if (data) {
             const realId = data.id;
-            // Patch IDs in-place (no history push)
             dispatch(
               patch({
                 tasks: currentSnapshot.tasks.concat(newTask).map((t) => (t.id === task.id ? { ...t, id: realId } : t)),
@@ -260,7 +246,6 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
 
         if (action === "update") {
           const updated = serializeTask(task);
-          // Preserve sortorder from existing task
           const existing = currentSnapshot.tasks.find((t) => t.id === id);
           if (existing) updated.sortorder = existing.sortorder;
 
@@ -293,7 +278,6 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
         }
       }
 
-      // ── LINK CRUD ────────────────────────────────────────
       if (entity === "link") {
         const link = item as Link;
 
@@ -369,6 +353,35 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
     }
   }, [dispatch, persistSnapshot]);
 
+  // ── Resource config ────────────────────────────────────────
+  const rCfg = useMemo(
+    () => ({
+      columns: [
+        {
+          name: "name",
+          label: "Name",
+          tree: true,
+          template: (resource: any) => resource.text,
+        },
+        {
+          name: "workload",
+          label: "Workload",
+          align: "center" as const,
+          template: (resource: any) => {
+            const items = tasks.filter(
+              (t) =>
+                t.type !== "project" &&
+                ((t as any).assignee_user_id ?? "unassigned") === resource.id,
+            );
+            const dur = items.reduce((sum, t) => sum + (t.duration || 0), 0);
+            return `${dur * 8}h`;
+          },
+        },
+      ],
+    }),
+    [tasks],
+  );
+
   // ── Config ─────────────────────────────────────────────────
   const config: GanttConfig = useMemo(
     () => ({
@@ -376,12 +389,64 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
       row_height: 36,
       bar_height: 24,
       scales: ZOOM_LEVELS[zoom].scales,
+      resource_store: "resources",
+      resource_property: "assignee_user_id",
       columns: [
         { name: "text", label: "Task", tree: true, width: "*" },
+        {
+          name: "owner",
+          label: "Owner",
+          align: "center",
+          width: 100,
+          template: (task: any) => {
+            const r = resources.find((r) => r.id === (task.assignee_user_id ?? "unassigned"));
+            return r?.text ?? "Unassigned";
+          },
+        },
         { name: "start_date", label: "Start", align: "center", width: 90 },
         { name: "duration", label: "Days", align: "center", width: 60 },
         ...(readOnly ? [] : [{ name: "add", label: "", width: 44 }]),
       ],
+      lightbox: {
+        sections: [
+          { name: "description", height: 38, map_to: "text", type: "textarea", focus: true },
+          {
+            name: "resources",
+            type: "select",
+            map_to: "assignee_user_id",
+            options: resources.map((r) => ({
+              key: r.id,
+              label: r.text,
+            })),
+          },
+          { name: "time", type: "duration", map_to: "auto" },
+        ],
+      },
+      layout: {
+        rows: [
+          {
+            cols: [
+              { view: "grid", group: "grids", scrollY: "v1" },
+              { resizer: true, width: 1 },
+              { view: "timeline", scrollX: "h", scrollY: "v1" },
+              { view: "scrollbar", id: "v1", group: "vertical" },
+            ],
+            gravity: 2,
+          },
+          { resizer: true, width: 1 },
+          {
+            config: rCfg,
+            cols: [
+              { view: "resourceGrid", group: "grids", scrollY: "v2" },
+              { resizer: true, width: 1 },
+              { view: "resourceTimeline", scrollX: "h", scrollY: "v2" },
+              { view: "scrollbar", id: "v2", group: "vertical" },
+            ],
+            gravity: 1,
+          },
+          { view: "scrollbar", id: "h" },
+        ],
+      },
       drag_move: !readOnly,
       drag_resize: !readOnly,
       readonly: readOnly,
@@ -390,12 +455,22 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
       work_time: true,
       skip_off_time: false,
     }),
-    [readOnly, zoom],
+    [readOnly, zoom, resources, rCfg],
   );
 
   const templates: GanttTemplates = useMemo(
     () => ({
       timeline_cell_class: (_item: Task, date: Date) => (isNonWorkingDay(date) ? "weekend-cell" : ""),
+      resource_cell_class: (_start: any, _end: any, _resource: any, tasks: any[]) => {
+        if (tasks.length <= 1) return "gantt-res-cell gantt-res-cell--ok";
+        return "gantt-res-cell gantt-res-cell--over";
+      },
+      resource_cell_value: (_start: any, _end: any, _resource: any, tasks: any[]) => {
+        const hours = tasks.length * 8;
+        if (hours === 0) return "";
+        const cls = tasks.length <= 1 ? "gantt-res-badge gantt-res-badge--ok" : "gantt-res-badge gantt-res-badge--over";
+        return `<div class="${cls}">${hours}</div>`;
+      },
     }),
     [],
   );
@@ -426,6 +501,7 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
           ref={ganttRef}
           tasks={tasks}
           links={links}
+          resources={resources}
           config={config}
           templates={templates}
           calendars={[PROJECT_CALENDAR]}

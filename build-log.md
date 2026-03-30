@@ -164,3 +164,14 @@
 - Added `timeline_cell_class` template to apply `.weekend-cell` CSS class to non-working day columns.
 - Added `.weekend-cell` style in `index.css` using the `--muted` design token for themed highlighting.
 - Set `skip_off_time: false` so weekends remain visible but visually distinct.
+## Task 09 — Resources and Task Assignee Support
+
+**Request**: Add resources and task assignee support. Resource panel with workload values, resource selection in lightbox, map `tasks.assignee_user_id` to Gantt `resource_id`, build resource list from project members, include Unassigned option, show workload in hours (count × 8), render resource timeline values as centered circular badges, distinguish normal vs overload styling.
+
+**Response**:
+- **`src/features/gantt/api/useProjectResources.ts`** (new) — React Query hook fetching project members from `project_members` + `users` tables, maps to Resource array with an explicit "Unassigned" entry.
+- **`src/features/gantt/api/useGanttData.ts`** — Updated `rowToGanttTask` to pass through `assignee_user_id` (defaulting to `"unassigned"`).
+- **`src/features/gantt/utils/payload.ts`** — Added `assignee_user_id` to `TaskInsertPayload`, `TaskUpdatePayload`, `buildTaskInsert`, and `buildTaskUpdate`.
+- **`src/features/gantt/components/ProjectGantt.tsx`** — Added resource config: Owner column in grid, lightbox resources section for assignee selection, split layout with resource grid + resource timeline, resource cell templates with workload badges.
+- **`src/index.css`** — Added CSS for `.gantt-res-cell` (ok/over backgrounds using design tokens), `.gantt-res-badge` (28px circular centered badges with primary/destructive coloring).
+- Workload = task count × 8h per cell. Overload threshold: >1 task triggers destructive styling. All colors use HSL design tokens.

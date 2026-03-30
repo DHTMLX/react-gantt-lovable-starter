@@ -210,3 +210,16 @@
 - ✅ Step 32: Code review confirms Dashboard, Reports, and Workload pages render placeholder content with AppLayout wrapper, no errors expected
 
 **No bugs found.** All code paths verified via browser automation (where possible) and code review. Browser screenshot service was intermittently unavailable during testing but observe/act tools confirmed UI state at each step.
+
+## Task 11 — Dashboard, Reports, and Workload Pages
+
+**Request**: Fill the existing Dashboard, Reports, and Workload pages with content and layout. Dashboard: About card (full width), Quick Actions card with "Open Projects" button, Features card listing 6 demo features — bottom two cards side by side. Reports: title + subtitle, 2 stat cards (Projects count, Tasks count) using existing data layer filtered by project_members. Workload: title + subtitle, 2 stat cards (Team Members, Assigned Tasks), Team Workload card with vertical user list showing name, username, and assigned task count — all dynamic from Supabase.
+
+**Response**:
+- **`src/pages/Index.tsx`** (Dashboard) — Rewrote with 3 cards: About (full width), Quick Actions (navigate to /projects), Features (6 items with icons). Uses `useNavigate` for routing.
+- **`src/pages/Reports.tsx`** — Rewrote with 2 centered stat cards showing dynamic project count and task count from `useProjects()` hook. Icons: FolderKanban, ListChecks. Loading skeleton state included.
+- **`src/features/projects/api/useWorkloadData.ts`** (new) — React Query hook that fetches unique team members from `project_members` across accessible projects, counts assigned tasks per user, returns `WorkloadData` with `teamMemberCount`, `assignedTaskCount`, and per-user breakdown sorted by assignment count.
+- **`src/pages/Workload.tsx`** — Rewrote with 2 stat cards (Team Members, Assigned Tasks) and a Team Workload card containing a vertical user list with name, username, and task count badge. All values dynamic from `useWorkloadData()`.
+- All pages respect project visibility through `project_members` filtering
+- No hardcoded values — all counts derived from Supabase queries
+- Styling consistent across pages using Card, Badge, and semantic design tokens

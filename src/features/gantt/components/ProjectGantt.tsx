@@ -1,36 +1,14 @@
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
-import Gantt, {
-  type GanttConfig,
-  type Link,
-  type ReactGanttRef,
-  type Task,
-} from "@dhtmlx/trial-react-gantt";
+import Gantt, { type GanttConfig, type Link, type ReactGanttRef, type Task } from "@dhtmlx/trial-react-gantt";
 import "@dhtmlx/trial-react-gantt/dist/react-gantt.css";
 import { useTheme } from "@/hooks/use-theme";
 import { useGanttData } from "@/features/gantt/api/useGanttData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  isRealUUID,
-  buildTaskInsert,
-  buildTaskUpdate,
-  buildLinkInsert,
-} from "@/features/gantt/utils/payload";
+import { isRealUUID, buildTaskInsert, buildTaskUpdate, buildLinkInsert } from "@/features/gantt/utils/payload";
 import { useAppDispatch, useAppSelector } from "@/features/gantt/store";
-import {
-  hydrate,
-  reset,
-  commit,
-  patch,
-  undo,
-  redo,
-} from "@/features/gantt/store/ganttSlice";
-import {
-  serializeTask,
-  serializeLink,
-  deserializeTask,
-  deserializeLink,
-} from "@/features/gantt/store/serialization";
+import { hydrate, reset, commit, patch, undo, redo } from "@/features/gantt/store/ganttSlice";
+import { serializeTask, serializeLink, deserializeTask, deserializeLink } from "@/features/gantt/store/serialization";
 import type { SerializedTask, SerializedLink } from "@/features/gantt/store/types";
 import { GanttToolbar } from "./GanttToolbar";
 import { ZOOM_LEVELS, type ZoomLevel } from "@/features/gantt/utils/zoom";
@@ -47,6 +25,8 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
 
   const dispatch = useAppDispatch();
   const { past, present, future } = useAppSelector((s) => s.gantt);
+  const presentRef = useRef(present);
+  presentRef.current = present;
 
   const [zoom, setZoom] = useState<ZoomLevel>("week");
 
@@ -78,21 +58,22 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
   // ── Helpers ────────────────────────────────────────────────
   const nextSortorder = useCallback((): number => {
     let max = 0;
-    for (const t of present.tasks) {
+    for (const t of presentRef.current.tasks) {
       if (t.sortorder > max) max = t.sortorder;
     }
     return max + 1;
-  }, [present.tasks]);
+  }, []);
 
   // ── Row reorder ────────────────────────────────────────────
   const handleReorder = useCallback(
     async (movedTask: Task) => {
+      const currentSnapshot = presentRef.current;
       const moved = movedTask as any;
       const targetId = moved.target;
       const newParent = moved.parent;
 
       // Build the current ordered list
-      const currentTasks = [...present.tasks];
+      const currentTasks = [...currentSnapshot.tasks];
 
       // Remove the moved task from its current position
       const movedIdx = currentTasks.findIndex((t) => t.id === moved.id);
@@ -131,7 +112,7 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
       dispatch(
         commit({
           tasks: reordered,
-          links: present.links,
+          links: currentSnapshot.links,
         }),
       );
 
@@ -147,25 +128,18 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
       // Batch update via individual calls (Supabase doesn't support batch upsert on non-PK)
       await Promise.all(
         updates.map(({ id, sortorder, parent_id }) =>
-          supabase
-            .from("tasks")
-            .update({ sortorder, parent_id })
-            .eq("id", id),
+          supabase.from("tasks").update({ sortorder, parent_id }).eq("id", id),
         ),
       );
     },
-    [present, dispatch],
+    [dispatch],
   );
 
   // ── CRUD handler ───────────────────────────────────────────
   const handleSave = useCallback(
-    async (
-      entity: string,
-      action: string,
-      item: any,
-      id: string | number,
-    ) => {
+    async (entity: string, action: string, item: any, id: string | number) => {
       console.log("[Gantt data.save]", entity, action, id, item);
+      const currentSnapshot = presentRef.current;
 
       // ── TASK CRUD ────────────────────────────────────────
       if (entity === "task") {
@@ -184,27 +158,21 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
 
           dispatch(
             commit({
-              tasks: [...present.tasks, newTask],
-              links: present.links,
+              tasks: [...currentSnapshot.tasks, newTask],
+              links: currentSnapshot.links,
             }),
           );
 
           const payload = buildTaskInsert(task, projectId, sortorder);
-          const { data, error: err } = await supabase
-            .from("tasks")
-            .insert(payload)
-            .select("id")
-            .single();
+          const { data, error: err } = await supabase.from("tasks").insert(payload).select("id").single();
 
           if (data) {
             const realId = data.id;
             // Patch IDs in-place (no history push)
             dispatch(
               patch({
-                tasks: present.tasks
-                  .concat(newTask)
-                  .map((t) => (t.id === task.id ? { ...t, id: realId } : t)),
-                links: present.links.map((l) => ({
+                tasks: currentSnapshot.tasks.concat(newTask).map((t) => (t.id === task.id ? { ...t, id: realId } : t)),
+                links: currentSnapshot.links.map((l) => ({
                   ...l,
                   source: l.source === task.id ? realId : l.source,
                   target: l.target === task.id ? realId : l.target,
@@ -218,22 +186,19 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
         if (action === "update") {
           const updated = serializeTask(task);
           // Preserve sortorder from existing task
-          const existing = present.tasks.find((t) => t.id === id);
+          const existing = currentSnapshot.tasks.find((t) => t.id === id);
           if (existing) updated.sortorder = existing.sortorder;
 
           dispatch(
             commit({
-              tasks: present.tasks.map((t) => (t.id === id ? updated : t)),
-              links: present.links,
+              tasks: currentSnapshot.tasks.map((t) => (t.id === id ? updated : t)),
+              links: currentSnapshot.links,
             }),
           );
 
           if (isRealUUID(String(id))) {
             const payload = buildTaskUpdate(task);
-            const { error: err } = await supabase
-              .from("tasks")
-              .update(payload)
-              .eq("id", String(id));
+            const { error: err } = await supabase.from("tasks").update(payload).eq("id", String(id));
             if (err) console.error("Task update failed:", err);
           }
         }
@@ -241,16 +206,13 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
         if (action === "delete") {
           dispatch(
             commit({
-              tasks: present.tasks.filter((t) => t.id !== id),
-              links: present.links,
+              tasks: currentSnapshot.tasks.filter((t) => t.id !== id),
+              links: currentSnapshot.links,
             }),
           );
 
           if (isRealUUID(String(id))) {
-            const { error: err } = await supabase
-              .from("tasks")
-              .delete()
-              .eq("id", String(id));
+            const { error: err } = await supabase.from("tasks").delete().eq("id", String(id));
             if (err) console.error("Task delete failed:", err);
           }
         }
@@ -264,24 +226,20 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
           const newLink = serializeLink(link);
           dispatch(
             commit({
-              tasks: present.tasks,
-              links: [...present.links, newLink],
+              tasks: currentSnapshot.tasks,
+              links: [...currentSnapshot.links, newLink],
             }),
           );
 
           const payload = buildLinkInsert(link, projectId);
           if (payload) {
-            const { data, error: err } = await supabase
-              .from("links")
-              .insert(payload)
-              .select("id")
-              .single();
+            const { data, error: err } = await supabase.from("links").insert(payload).select("id").single();
 
             if (data) {
               const realId = data.id;
               dispatch(
                 patch({
-                  links: present.links
+                  links: currentSnapshot.links
                     .concat(newLink)
                     .map((l) => (l.id === link.id ? { ...l, id: realId } : l)),
                 }),
@@ -294,22 +252,19 @@ export default function ProjectGantt({ projectId, readOnly = false }: ProjectGan
         if (action === "delete") {
           dispatch(
             commit({
-              tasks: present.tasks,
-              links: present.links.filter((l) => l.id !== id),
+              tasks: currentSnapshot.tasks,
+              links: currentSnapshot.links.filter((l) => l.id !== id),
             }),
           );
 
           if (isRealUUID(String(id))) {
-            const { error: err } = await supabase
-              .from("links")
-              .delete()
-              .eq("id", String(id));
+            const { error: err } = await supabase.from("links").delete().eq("id", String(id));
             if (err) console.error("Link delete failed:", err);
           }
         }
       }
     },
-    [projectId, nextSortorder, handleReorder, present, dispatch],
+    [projectId, nextSortorder, handleReorder, dispatch],
   );
 
   // ── Undo/Redo handlers ────────────────────────────────────

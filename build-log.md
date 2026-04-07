@@ -265,3 +265,32 @@ Rules: use attached design reference images as primary visual target; synthesize
 **Build status:** TypeScript build passes with no errors.
 
 **Behavior preserved:** All routes, data flow, CRUD operations, role-based permissions, undo/redo, resource panel, and Supabase persistence remain unchanged.
+
+---
+
+## Runtime blank screen fix — React dispatcher null
+
+### Request
+
+The app isn't working, the page is blank. Investigate the problem.
+
+Runtime errors observed:
+- `can't access property "useMemo", dispatcher is null`
+- prior related error: `can't access property "useState", dispatcher is null`
+
+### Response
+
+Identified the root cause as a Vite dev-time dependency optimization / HMR mismatch that caused `react-redux` to resolve against a stale React dispatcher after dependency optimization changed during the session.
+
+Fix applied in `vite.config.ts`:
+- Added hard aliases for `react`, `react-dom`, `react/jsx-runtime`, and `react/jsx-dev-runtime`
+- Kept React dedupe rules
+- Added `optimizeDeps.include` for core React/Redux/router/query dependencies and `@radix-ui/react-progress`
+
+Also cleared the stale Vite optimized cache at `node_modules/.vite` so the next load rebuilds with a consistent dependency graph.
+
+Validation:
+- `npx tsc --noEmit` passed successfully.
+
+User action needed:
+- Hard refresh the preview once so Vite can rebuild the optimized dependency cache with the updated config.

@@ -6,8 +6,24 @@ export function ThemeToggle() {
   const { theme, toggle } = useTheme();
 
   return (
-    <Button variant="ghost" size="icon" onClick={toggle} aria-label="Toggle theme">
-      {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={toggle}
+      aria-label="Toggle theme"
+      className="gap-2 h-9 px-3 text-xs font-medium"
+    >
+      {theme === "dark" ? (
+        <>
+          <Sun className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Day mode</span>
+        </>
+      ) : (
+        <>
+          <Moon className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Night mode</span>
+        </>
+      )}
     </Button>
   );
 }

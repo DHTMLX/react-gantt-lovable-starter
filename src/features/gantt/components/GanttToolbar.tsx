@@ -39,9 +39,14 @@ export function GanttToolbar({
   };
 
   return (
-    <div className="flex items-center gap-2 py-2 px-1 border-b bg-card shrink-0">
-      {/* Zoom controls */}
-      <div className="flex items-center gap-1">
+    <div className="flex items-center justify-between py-3 px-4 rounded-t-lg border bg-card shrink-0">
+      <div>
+        <p className="text-[10px] font-semibold tracking-widest uppercase text-primary">Timeline Controls</p>
+        <p className="text-xs text-muted-foreground">Adjust zoom and navigate changes without leaving the schedule.</p>
+      </div>
+
+      <div className="flex items-center gap-1.5">
+        {/* Zoom controls */}
         <Button
           variant="ghost"
           size="icon"
@@ -76,36 +81,34 @@ export function GanttToolbar({
         >
           <ZoomOut className="h-4 w-4" />
         </Button>
+
+        {/* Undo / Redo */}
+        {!readOnly && (
+          <>
+            <div className="w-px h-5 bg-border mx-1" />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              disabled={!canUndo}
+              onClick={onUndo}
+              title="Undo"
+            >
+              <Undo2 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              disabled={!canRedo}
+              onClick={onRedo}
+              title="Redo"
+            >
+              <Redo2 className="h-4 w-4" />
+            </Button>
+          </>
+        )}
       </div>
-
-      {/* Separator */}
-      <div className="w-px h-5 bg-border" />
-
-      {/* Undo / Redo */}
-      {!readOnly && (
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            disabled={!canUndo}
-            onClick={onUndo}
-            title="Undo"
-          >
-            <Undo2 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            disabled={!canRedo}
-            onClick={onRedo}
-            title="Redo"
-          >
-            <Redo2 className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

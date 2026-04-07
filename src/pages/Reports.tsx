@@ -1,4 +1,5 @@
 import { AppLayout } from "@/components/AppLayout";
+import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FolderKanban, ListChecks } from "lucide-react";
@@ -12,35 +13,32 @@ const Reports = () => {
 
   return (
     <AppLayout>
-      <div className="max-w-4xl">
-        <h1 className="text-2xl font-semibold tracking-tight">Reports</h1>
-        <p className="text-muted-foreground mt-1">Project and task overview.</p>
+      <PageHeader badge="Reports" title="Progress signals" subtitle="Built for calm, visible planning across projects, people, and delivery risk." />
 
-        {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-            <Skeleton className="h-[120px] rounded-lg" />
-            <Skeleton className="h-[120px] rounded-lg" />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-8 gap-2">
-                <FolderKanban className="h-8 w-8 text-primary" />
-                <p className="text-3xl font-semibold">{projectCount}</p>
-                <p className="text-sm text-muted-foreground">Projects</p>
-              </CardContent>
-            </Card>
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Skeleton className="h-[140px] rounded-lg" />
+          <Skeleton className="h-[140px] rounded-lg" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-10 gap-2">
+              <FolderKanban className="h-8 w-8 text-primary" />
+              <p className="text-4xl font-bold">{projectCount}</p>
+              <p className="text-xs text-muted-foreground">Projects</p>
+            </CardContent>
+          </Card>
 
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-8 gap-2">
-                <ListChecks className="h-8 w-8 text-primary" />
-                <p className="text-3xl font-semibold">{taskCount}</p>
-                <p className="text-sm text-muted-foreground">Tasks</p>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-      </div>
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-10 gap-2">
+              <ListChecks className="h-8 w-8 text-primary" />
+              <p className="text-4xl font-bold">{taskCount}</p>
+              <p className="text-xs text-muted-foreground">Tasks</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </AppLayout>
   );
 };

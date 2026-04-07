@@ -223,3 +223,45 @@
 - All pages respect project visibility through `project_members` filtering
 - No hardcoded values — all counts derived from Supabase queries
 - Styling consistent across pages using Card, Badge, and semantic design tokens
+
+---
+
+## Task 12 — Visual redesign to match design references
+
+### Request
+
+Redesign the app experience to match the provided design reference images while preserving all implemented behavior from steps 01 through 11.
+
+Scope: global visual design refresh, sidebar and top header redesign, wider main workspace layout, Dashboard/Projects/Reports/Workload/ProjectDetail redesign, Gantt toolbar visual refresh.
+
+Rules: use attached design reference images as primary visual target; synthesize a cohesive UI; keep existing routes, data flow, permissions, and Supabase integration intact; do not replace DHTMLX Gantt; preserve responsive behavior and support both light and dark themes.
+
+### Response
+
+**Files modified:**
+
+1. `src/index.css` — Updated design tokens: teal primary (`174 42% 36%`), warm cream background (`40 30% 96%`), dark teal sidebar (`174 28% 18%`), increased border-radius, full dark mode counterparts.
+
+2. `src/components/AppSidebar.tsx` — Redesigned sidebar: "DASH FLOW" branding with logo icon, search input, nav items with subtitle descriptions, user avatar/username footer, "Switch demo user" button instead of "Sign Out".
+
+3. `src/components/AppLayout.tsx` — Updated header: taller (h-14), signed-in user info block (name + email), Night/Day mode toggle with label.
+
+4. `src/components/ThemeToggle.tsx` — Redesigned as labeled button ("Night mode" / "Day mode") with outline variant.
+
+5. `src/components/PageHeader.tsx` — New shared component with badge, title, and subtitle used across all pages.
+
+6. `src/pages/Index.tsx` — Dashboard redesign: hero card with "Modern Planning Workspace" badge and large typography, "Quick Actions" card with "Open Portfolio" button, 2x3 feature tiles grid with icons/titles/descriptions.
+
+7. `src/pages/Projects.tsx` — Portfolio redesign: hero section with "Portfolio Overview" badge, project cards with completion %/tasks/done stats, progress bars, "Open plan →" links, context cards at bottom.
+
+8. `src/pages/Reports.tsx` — Reports redesign with PageHeader badge, consistent stat card styling.
+
+9. `src/pages/Workload.tsx` — Workload redesign: "Capacity Map" hero, 3 stat cards (team members, assigned tasks, peak load), "Team Distribution" list sorted by load.
+
+10. `src/pages/ProjectDetail.tsx` — Project detail reframe: "Active Workspace" badge, project name, description, feature badges (live schedule editing, dependencies, editing enabled), role badge, Members button.
+
+11. `src/features/gantt/components/GanttToolbar.tsx` — Toolbar redesign: "TIMELINE CONTROLS" label with description, right-aligned zoom/undo/redo controls, rounded top border.
+
+**Build status:** TypeScript build passes with no errors.
+
+**Behavior preserved:** All routes, data flow, CRUD operations, role-based permissions, undo/redo, resource panel, and Supabase persistence remain unchanged.

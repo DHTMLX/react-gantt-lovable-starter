@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/PageHeader";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
@@ -10,15 +11,16 @@ import {
   Database,
   ShieldCheck,
   LayoutList,
+  Sparkles,
 } from "lucide-react";
 
 const features = [
-  { icon: LayoutList, label: "Multi-project planning" },
-  { icon: CalendarRange, label: "Gantt timeline per project" },
-  { icon: Link2, label: "Task dependencies" },
-  { icon: GripVertical, label: "Drag-and-drop scheduling" },
-  { icon: Database, label: "Supabase data persistence" },
-  { icon: ShieldCheck, label: "Viewer / Editor roles" },
+  { icon: LayoutList, title: "Multi-project planning", desc: "Track delivery across parallel initiatives." },
+  { icon: CalendarRange, title: "Live Gantt timelines", desc: "Shape milestones, start dates, and durations visually." },
+  { icon: Link2, title: "Dependency mapping", desc: "Reveal handoffs and sequence risk before they block delivery." },
+  { icon: GripVertical, title: "Drag-and-drop updates", desc: "Adjust plans with direct manipulation instead of forms." },
+  { icon: Database, title: "Resource visibility", desc: "See who owns what and where load is stacking up." },
+  { icon: ShieldCheck, title: "Role-based access", desc: "Keep viewers safe while editors and owners can move work." },
 ];
 
 const Dashboard = () => {
@@ -26,53 +28,56 @@ const Dashboard = () => {
 
   return (
     <AppLayout>
-      <div className="max-w-4xl">
-        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+      <PageHeader badge="Overview" title="Planning command center" subtitle="Built for calm, visible planning across projects, people, and delivery risk." />
 
-        {/* About card — full width */}
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle className="text-base">About this demo app</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Starter project planning tool built with DHTMLX React Gantt, React, Lovable, and
-              Supabase.
+      {/* Hero card */}
+      <Card className="mb-6 overflow-hidden border-0 bg-gradient-to-br from-accent to-card">
+        <CardContent className="py-10 px-8 max-w-2xl">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 mb-4">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            <span className="text-[10px] font-semibold tracking-widest uppercase text-primary">
+              Modern Planning Workspace
+            </span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight leading-tight mb-4">
+            Build calm around<br />complex delivery.
+          </h2>
+          <p className="text-muted-foreground leading-relaxed max-w-lg">
+            This application is a starter project planning tool built with the DHTMLX React Gantt component,
+            demonstrating how a timeline-based project management app can be created in Lovable using
+            React and Supabase.
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Bottom row */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+        {/* Quick actions */}
+        <Card className="lg:col-span-2">
+          <CardContent className="py-8 px-6">
+            <p className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-1">Quick Actions</p>
+            <h3 className="text-lg font-semibold mb-2">Jump into the planning flow</h3>
+            <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
+              Start with the portfolio view to review active projects and open the workspace that needs attention.
             </p>
+            <Button className="gap-2" onClick={() => navigate("/projects")}>
+              Open Portfolio
+              <ArrowRight className="h-4 w-4" />
+            </Button>
           </CardContent>
         </Card>
 
-        {/* Bottom row — 2 cards side by side */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-          {/* Quick actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Quick actions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="gap-2" onClick={() => navigate("/projects")}>
-                Open Projects
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Features */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Features demonstrated in this demo</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
-                {features.map(({ icon: Icon, label }) => (
-                  <li key={label} className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Icon className="h-4 w-4 shrink-0 text-primary" />
-                    {label}
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
+        {/* Feature tiles */}
+        <div className="lg:col-span-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {features.map(({ icon: Icon, title, desc }) => (
+            <Card key={title} className="border hover:border-primary/30 transition-colors">
+              <CardContent className="py-5 px-4">
+                <Icon className="h-5 w-5 text-muted-foreground mb-3" />
+                <p className="text-sm font-semibold mb-1">{title}</p>
+                <p className="text-[11px] text-muted-foreground leading-snug">{desc}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     </AppLayout>

@@ -33,16 +33,18 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
         {/* Quick actions */}
         <Card className="lg:col-span-2">
-          <CardContent className="py-8 px-6">
+          <CardContent className="py-8 px-6 flex flex-col h-full">
             <p className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-1">Quick Actions</p>
             <h3 className="text-lg font-semibold mb-2">Jump into the planning flow</h3>
             <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
               Start with the portfolio view to review active projects and open the workspace that needs attention.
             </p>
-            <Button className="gap-2" onClick={() => navigate("/projects")}>
-              Open Portfolio
-              <ArrowRight className="h-4 w-4" />
-            </Button>
+            <div className="mt-auto flex justify-end">
+              <Button className="gap-2" onClick={() => navigate("/projects")}>
+                Open Portfolio
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
           </CardContent>
         </Card>
 

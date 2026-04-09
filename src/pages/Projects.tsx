@@ -47,7 +47,7 @@ const Projects = () => {
       )}
 
       {projects && projects.length > 0 && (
-        <div className="rounded-lg border divide-y mb-4">
+        <div className="space-y-2 mb-4">
           {projects.map((p) => {
             const status = statusLabel(p.task_count, p.completed_count);
             const pct = p.task_count > 0 ? Math.round((p.completed_count / p.task_count) * 100) : 0;
@@ -56,7 +56,7 @@ const Projects = () => {
               <Link
                 key={p.id}
                 to={`/projects/${p.id}`}
-                className="flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors group"
+                className="flex items-center justify-between px-4 py-3 rounded-lg border bg-card hover:bg-accent transition-colors group"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <h3 className="text-sm font-medium truncate">{p.name}</h3>

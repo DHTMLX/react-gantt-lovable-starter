@@ -1,9 +1,9 @@
 import { useParams, Link } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
-import { PageHeader } from "@/components/PageHeader";
 import { ArrowLeft, CalendarRange, Link2, Settings2, Users } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Button } from "@/components/ui/button";
 import { useProject } from "@/features/projects/api/useProject";
 import { useProjectRole } from "@/features/projects/api/useProjectRole";

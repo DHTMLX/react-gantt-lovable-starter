@@ -11,7 +11,6 @@ import {
   Database,
   ShieldCheck,
   LayoutList,
-  Sparkles,
 } from "lucide-react";
 
 const features = [
@@ -28,27 +27,7 @@ const Dashboard = () => {
 
   return (
     <AppLayout>
-      <PageHeader badge="Overview" title="Planning command center" subtitle="Built for calm, visible planning across projects, people, and delivery risk." />
-
-      {/* Hero card */}
-      <Card className="mb-6 overflow-hidden border-0 bg-gradient-to-br from-accent to-card">
-        <CardContent className="py-10 px-8 max-w-2xl">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 mb-4">
-            <Sparkles className="h-3.5 w-3.5 text-primary" />
-            <span className="text-[10px] font-semibold tracking-widest uppercase text-primary">
-              Modern Planning Workspace
-            </span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight leading-tight mb-4">
-            Build calm around<br />complex delivery.
-          </h2>
-          <p className="text-muted-foreground leading-relaxed max-w-lg">
-            This application is a starter project planning tool built with the DHTMLX React Gantt component,
-            demonstrating how a timeline-based project management app can be created in Lovable using
-            React and Supabase.
-          </p>
-        </CardContent>
-      </Card>
+      <PageHeader badge="Overview" title="Planning command center" subtitle="This application is a starter project planning tool built with the DHTMLX React Gantt component, demonstrating how a timeline-based project management app can be created in Lovable using React and Supabase." />
 
       {/* Bottom row */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">

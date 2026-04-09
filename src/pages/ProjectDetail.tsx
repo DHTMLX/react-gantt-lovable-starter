@@ -54,22 +54,15 @@ const ProjectDetail = () => {
     <AppLayout>
       <div className="flex flex-col h-full -m-6">
         <div className="px-6 pt-6 pb-5 shrink-0">
-          <PageHeader badge="Active Plan" title="Project workspace" subtitle="Built for calm, visible planning across projects, people, and delivery risk." />
-
-          <Button variant="outline" size="sm" asChild className="mb-5 gap-1.5 text-xs">
+          <Button variant="outline" size="sm" asChild className="mb-4 gap-1.5 text-xs">
             <Link to="/projects">
               <ArrowLeft className="h-3.5 w-3.5" /> Back to Projects
             </Link>
           </Button>
 
           <div className="rounded-xl border bg-card p-5">
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 mb-2">
-                  <span className="text-[10px] font-semibold tracking-widest uppercase text-primary">Active Workspace</span>
-                </div>
-                <h2 className="text-2xl font-bold tracking-tight">{project.name}</h2>
-              </div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-2xl font-bold tracking-tight">{project.name}</h2>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs uppercase font-semibold tracking-wider">
                   {role}
@@ -77,10 +70,6 @@ const ProjectDetail = () => {
                 <MemberManagement projectId={project.id} currentRole={role} />
               </div>
             </div>
-
-            <p className="text-sm text-muted-foreground mb-4 max-w-lg">
-              A focused planning surface for sequencing work, adjusting assignments, and keeping dependencies legible.
-            </p>
 
             {!readOnly && (
               <div className="flex flex-wrap gap-2">

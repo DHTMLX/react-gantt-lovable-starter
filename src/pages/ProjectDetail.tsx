@@ -4,7 +4,6 @@ import { ArrowLeft, CalendarRange, Link2, Settings2, Users } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Button } from "@/components/ui/button";
 import { useProject } from "@/features/projects/api/useProject";
 import { useProjectRole } from "@/features/projects/api/useProjectRole";
 import { MemberManagement } from "@/features/projects/components/MemberManagement";

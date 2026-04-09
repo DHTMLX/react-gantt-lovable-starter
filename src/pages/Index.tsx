@@ -11,7 +11,6 @@ import {
   Database,
   ShieldCheck,
   LayoutList,
-  Sparkles,
 } from "lucide-react";
 
 const features = [

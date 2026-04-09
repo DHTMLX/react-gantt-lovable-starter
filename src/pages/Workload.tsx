@@ -28,32 +28,6 @@ const Workload = () => {
         </div>
       ) : (
         <>
-          {/* Hero */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
-            <Card className="lg:col-span-2 border-0 bg-gradient-to-br from-accent to-card overflow-hidden">
-              <CardContent className="py-8 px-8">
-                <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 mb-4">
-                  <span className="text-[10px] font-semibold tracking-widest uppercase text-primary">Capacity Map</span>
-                </div>
-                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight leading-tight mb-3">
-                  See where the team has room,<br />and where it is starting to stretch.
-                </h2>
-                <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
-                  The workload view now reads like an operations surface, with quick counts up front and a cleaner list of people below.
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="py-8 px-6">
-                <p className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-2">Operating Note</p>
-                <h3 className="text-lg font-semibold mb-2">Capacity should be visible at a glance</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  This page is now structured more like a planning console: a broad lead panel, fast metrics, and a denser collaborator list that can scale with the team.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
           {/* Stat cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <Card>

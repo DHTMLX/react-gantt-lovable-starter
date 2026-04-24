@@ -1,7 +1,6 @@
 # Project Architecture
 
 ## Stack
-
 - **Framework**: React 18 + TypeScript
 - **Build**: Vite
 - **Styling**: Tailwind CSS + shadcn/ui
@@ -9,7 +8,6 @@
 - **State**: React Query (tanstack)
 
 ## Directory Structure
-
 ```
 src/
 ├── assets/                  # Static images and media
@@ -48,7 +46,6 @@ src/
 ```
 
 ## Design System
-
 - Tokens defined in `src/index.css` (HSL variables)
 - Extended in `tailwind.config.ts`
 - Font: Inter
@@ -56,12 +53,11 @@ src/
 - Sidebar collapsed by default
 
 ## Routing
-
-| Path            | Page                   |
-| --------------- | ---------------------- |
-| `/`             | Dashboard              |
-| `/projects`     | Projects list          |
-| `/projects/:id` | Project detail         |
-| `/reports`      | Reports (placeholder)  |
-| `/workload`     | Workload (placeholder) |
-| `*`             | 404 Not Found          |
+| Path | Page |
+|------|------|
+| `/` | Dashboard |
+| `/projects` | Projects list |
+| `/projects/:id` | Project detail |
+| `/reports` | Reports (placeholder) |
+| `/workload` | Workload (placeholder) |
+| `*` | 404 Not Found |

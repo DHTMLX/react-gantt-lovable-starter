@@ -1,10 +1,22 @@
 # React Gantt Lovable Starter
 
+[![npm: @dhtmlx/trial-react-gantt](https://img.shields.io/npm/v/@dhtmlx/trial-react-gantt?label=%40dhtmlx%2Ftrial-react-gantt)](https://www.npmjs.com/package/@dhtmlx/trial-react-gantt)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](#license)
+[![Built with Lovable](https://img.shields.io/badge/built%20with-Lovable-ff69b4)](https://lovable.dev)
+
 This project is a multi-project planning demo built with **DHTMLX React Gantt**, **React**, **TypeScript**, **Vite**, and **Supabase**. It combines a routed app shell, project portfolio pages, a per-project Gantt workspace, demo-only role-based access, persistent CRUD, row reordering, working-time behavior, and resource workload views.
 
-The app was assembled step by step from the prompts and architecture notes in [`lovable/`](./lovable), so that folder also serves as the project’s build history and implementation guide.
+The app was assembled step by step from the prompts and architecture notes in [`lovable/`](./lovable), so that folder also serves as the project's build history and implementation guide.
 
 ### **[✨ Try the Live Demo >>>](https://react-gantt-lovable-starter.lovable.app)**
+
+## What's inside
+
+This repo has three layers, each useful on its own:
+
+- **App code** under [`src/`](./src) - a working React + Supabase planner you can run, fork, or strip down for your own use.
+- **Supabase migrations** under [`supabase/migrations`](./supabase/migrations) - schema, demo policies, and seed data, applied in order.
+- **Lovable build recipe** under [`lovable/`](./lovable) - the exact prompt sequence used to generate the app, plus a log of every manual fix that was applied to the generated output. Reuse it to reproduce the build in your own Lovable workspace, or read it as a worked example of building a complex Gantt app with Lovable.
 
 ## Features
 
@@ -105,13 +117,25 @@ src/
   lib/                       utilities
 supabase/
   migrations/                schema, policy, and seed SQL
-lovable/
-  00-build-plan.md           step-by-step build sequence
-  00-project-architecture.md architecture baseline
-  00-knowledge.md            DHTMLX React Gantt knowledge base
-  00-manual-edits.md         follow-up fixes applied after generated steps
-  01-11 *.md                 implementation prompts for each build stage
+lovable/                     prompt sequence + build log
 ```
+
+The full ordered prompt list lives in [`lovable/00-build-plan.md`](./lovable/00-build-plan.md), with companion files for the architecture baseline, the Knowledge Base content, the implementation prompts for each stage, and a record of every manual fix.
+
+## Going to production
+
+This starter installs the public trial package `@dhtmlx/trial-react-gantt`, which renders an evaluation watermark. Before shipping to real users:
+
+1. Obtain a commercial DHTMLX license, configure the [DHTMLX private npm registry](https://docs.dhtmlx.com/gantt/integrations/react/installation/), and swap `@dhtmlx/trial-react-gantt` for `@dhx/react-gantt`. The [installation guide](https://docs.dhtmlx.com/gantt/integrations/react/installation/#moving-from-the-trial-package-to-the-commercial-one) walks through the package swap and a short Lovable note.
+2. Replace the demo identity flow with real authentication. Permissions in this starter are demo-only; the project membership rows and role checks are intentionally lightweight.
+
+## AI tooling
+
+If you continue editing this project with an AI coding assistant, three companion tools sharpen the output:
+
+- [DHTMLX MCP Server](https://docs.dhtmlx.com/gantt/integrations/ai-tools/mcp-server/) - real-time DHTMLX API reference for any MCP-aware assistant (Claude Code, Cursor, ChatGPT, Gemini CLI, and others).
+- [DHTMLX Agent Skills](https://github.com/DHTMLX/skills) - opinionated patterns and known pitfalls for working with React Gantt; pair with MCP for best results.
+- [Lovable AI integration guide](https://docs.dhtmlx.com/gantt/integrations/ai-tools/lovable-ai/) - the published walkthrough of using DHTMLX inside Lovable, including the [reproduction guide](https://docs.dhtmlx.com/gantt/integrations/ai-tools/lovable-starter-walkthrough/) for this starter.
 
 ## License
 
@@ -124,5 +148,7 @@ Using **Supabase** is subject to their [terms of service](https://supabase.com/t
 
 - [DHTMLX Gantt Product Page](https://dhtmlx.com/docs/products/dhtmlxGantt/)
 - [DHTMLX Gantt Documentation](https://docs.dhtmlx.com/gantt/)
+- [DHTMLX AI Tools overview](https://docs.dhtmlx.com/gantt/integrations/ai-tools/) - MCP, agent skills, Lovable, and semantic search
 - [Supabase Documentation](https://supabase.com/docs)
 - [DHTMLX technical support forum](https://forum.dhtmlx.com/)
+- Other React starters: [react-gantt-quick-start](https://github.com/dhtmlx/react-gantt-quick-start), [react-gantt-jotai-starter](https://github.com/dhtmlx/react-gantt-jotai-starter), [react-gantt-redux-starter](https://github.com/dhtmlx/react-gantt-redux-starter), [react-gantt-tanstack-query-starter](https://github.com/dhtmlx/react-gantt-tanstack-query-starter), [react-gantt-zustand-starter](https://github.com/dhtmlx/react-gantt-zustand-starter)

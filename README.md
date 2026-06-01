@@ -6,7 +6,7 @@
 
 This project is a multi-project planning demo built with **DHTMLX React Gantt**, **React**, **TypeScript**, **Vite**, and **Supabase**. It combines a routed app shell, project portfolio pages, a per-project Gantt workspace, demo-only role-based access, persistent CRUD, row reordering, working-time behavior, and resource workload views.
 
-The app was assembled step by step from the prompts and architecture notes in [`lovable/`](./lovable), so that folder also serves as the project's build history and implementation guide.
+The app was assembled step by step from the prompts and architecture notes in [`docs/`](./docs), so that folder also serves as the project's build history and implementation guide.
 
 ### **[✨ Try the Live Demo >>>](https://react-gantt-lovable-starter.lovable.app)**
 
@@ -16,7 +16,7 @@ This repo has three layers, each useful on its own:
 
 - **App code** under [`src/`](./src) - a working React + Supabase planner you can run, fork, or strip down for your own use.
 - **Supabase migrations** under [`supabase/migrations`](./supabase/migrations) - schema, demo policies, and seed data, applied in order.
-- **Lovable build recipe** under [`lovable/`](./lovable) - the exact prompt sequence used to generate the app, plus a log of every manual fix that was applied to the generated output. Reuse it to reproduce the build in your own Lovable workspace, or read it as a worked example of building a complex Gantt app with Lovable.
+- **Lovable build recipe** under [`docs/`](./docs) - the exact prompt sequence used to generate the app, plus a log of every manual fix that was applied to the generated output. Reuse it to reproduce the build in your own Lovable workspace, or read it as a worked example of building a complex Gantt app with Lovable.
 
 ## Features
 
@@ -117,10 +117,10 @@ src/
   lib/                       utilities
 supabase/
   migrations/                schema, policy, and seed SQL
-lovable/                     prompt sequence + build log
+docs/                        prompt sequence + build log
 ```
 
-The full ordered prompt list lives in [`lovable/00-build-plan.md`](./lovable/00-build-plan.md), with companion files for the architecture baseline, the Knowledge Base content, the implementation prompts for each stage, and a record of every manual fix.
+The full ordered prompt list lives in [`docs/00-build-plan.md`](./docs/00-build-plan.md), with companion files for the architecture baseline, the Knowledge Base content, the implementation prompts for each stage, and a record of every manual fix.
 
 ## Going to production
 
